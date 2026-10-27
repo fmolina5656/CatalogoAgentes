@@ -3,7 +3,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 data/
-capturas/
+/capturas/
 node_modules/
 frontend/dist/
 .azure/
