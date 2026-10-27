@@ -9,3 +9,5 @@ frontend/dist/
 .azure/
 .env
 *.local
+*.tsbuildinfo
+e2e/node_modules/

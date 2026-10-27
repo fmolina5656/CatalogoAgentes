@@ -207,6 +207,11 @@ class Repo:
     def sembrar_si_vacio(self, archivo) -> int:
         if self.store.list("agentes/"):
             return 0
+        # Crear orden.json funciona como candado: si otra réplica ya está sembrando, esta no lo hace.
+        try:
+            self.store.put(ORDEN, b"[]", content_type="application/json", if_none_match=True)
+        except Conflict:
+            return 0
         datos = json.loads(archivo.read_text(encoding="utf-8"))
         n = 0
         for d in datos:
