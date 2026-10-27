@@ -139,8 +139,12 @@ resource entorno 'Microsoft.App/managedEnvironments@2024-03-01' = {
 }
 
 // Si la app ya existe, conserva la imagen que desplegó azd (no la reemplaza por la de ejemplo).
-resource appExistente 'Microsoft.App/containerApps@2024-03-01' existing = if (webExists) {
-  name: appName
+module imagenActual 'imagen-actual.bicep' = {
+  name: 'imagen-actual'
+  params: {
+    exists: webExists
+    name: appName
+  }
 }
 
 var secretos = concat([
@@ -153,7 +157,7 @@ var secretos = concat([
 // así que mientras esté puesta no lleva sondas ni réplicas mínimas: si no, la revisión
 // nunca queda sana y el aprovisionamiento vence ("Operation expired").
 var imagenEjemplo = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-var imagen = webExists ? appExistente.properties.template.containers[0].image : imagenEjemplo
+var imagen = webExists && !empty(imagenActual.outputs.image) ? imagenActual.outputs.image : imagenEjemplo
 var esEjemplo = imagen == imagenEjemplo
 var sondas = esEjemplo ? [] : [
   { type: 'Liveness', httpGet: { path: '/api/salud', port: 8000 }, initialDelaySeconds: 10, periodSeconds: 30 }
