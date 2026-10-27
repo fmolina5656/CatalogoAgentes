@@ -11,6 +11,7 @@
     "adminAllowedDomains": { "value": "${ADMIN_ALLOWED_DOMAINS=}" },
     "adminAllowedEmails": { "value": "${ADMIN_ALLOWED_EMAILS=}" },
     "minReplicas": { "value": "${MIN_REPLICAS=1}" },
-    "seedOnEmpty": { "value": "${SEED_ON_EMPTY=true}" }
+    "seedOnEmpty": { "value": "${SEED_ON_EMPTY=true}" },
+    "asignarRoles": { "value": "${ASIGNAR_ROLES=true}" }
   }
 }

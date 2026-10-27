@@ -33,6 +33,9 @@ param adminAllowedEmails string = ''
 @description('Réplicas mínimas. 1 evita el arranque en frío durante un evento; 0 ahorra costo.')
 param minReplicas int = 1
 
+@description('Crear las asignaciones de roles (AcrPull y Storage Blob Data Contributor). Requiere permiso Microsoft.Authorization/roleAssignments/write.')
+param asignarRoles bool = true
+
 @description('Cargar la semilla de agentes si el catálogo está vacío.')
 param seedOnEmpty string = 'true'
 
@@ -60,6 +63,7 @@ module recursos 'modules/recursos.bicep' = {
     adminAllowedEmails: adminAllowedEmails
     minReplicas: minReplicas
     seedOnEmpty: seedOnEmpty
+    asignarRoles: asignarRoles
   }
 }
 
@@ -67,6 +71,10 @@ output AZURE_RESOURCE_GROUP string = rg.name
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = recursos.outputs.registryLoginServer
 output AZURE_CONTAINER_REGISTRY_NAME string = recursos.outputs.registryName
 output AZURE_STORAGE_ACCOUNT_URL string = recursos.outputs.storageUrl
+// Para que un admin cree los roles cuando ASIGNAR_ROLES=false
+output AZURE_CONTAINER_REGISTRY_ID string = recursos.outputs.registryId
+output AZURE_STORAGE_ACCOUNT_ID string = recursos.outputs.storageId
+output AZURE_IDENTITY_PRINCIPAL_ID string = recursos.outputs.identityPrincipalId
 output SERVICE_WEB_NAME string = recursos.outputs.appName
 output SERVICE_WEB_URI string = recursos.outputs.appUri
 output ENTRA_REDIRECT_URI string = '${recursos.outputs.appUri}/.auth/login/aad/callback'

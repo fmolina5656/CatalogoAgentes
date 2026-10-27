@@ -270,6 +270,37 @@ azd up
 
 `azd up` crea la infraestructura, compila la imagen en Azure Container Registry y la despliega. Al terminar muestra la URL, y el catálogo público ya funciona.
 
+### Si tu cuenta no puede asignar roles
+
+`azd up` da roles a la identidad administrada de la app: **AcrPull** en el registro y **Storage Blob Data Contributor** en el Storage. Para eso hace falta el permiso `Microsoft.Authorization/roleAssignments/write`. Si no lo tienes, verás `does not have permission to perform action 'Microsoft.Authorization/roleAssignments/write'`.
+
+Hay dos salidas:
+
+**A. Pedir el permiso (lo más simple).** Pide a quien administre la suscripción el rol **Role Based Access Control Administrator** sobre el grupo de recursos `rg-<entorno>`. Puede limitarlo a esos dos roles. Luego repite `azd up`.
+
+**B. Provisionar sin roles y que un admin los cree.** Tú corres:
+
+```bat
+azd env set ASIGNAR_ROLES false
+azd provision
+azd env get-values
+```
+
+De la salida de `azd env get-values` toma `AZURE_IDENTITY_PRINCIPAL_ID`, `AZURE_CONTAINER_REGISTRY_ID` y `AZURE_STORAGE_ACCOUNT_ID`. Con esos valores, alguien con permiso (Owner, User Access Administrator o RBAC Administrator) corre una sola vez:
+
+```bat
+az role assignment create --assignee-object-id <AZURE_IDENTITY_PRINCIPAL_ID> --assignee-principal-type ServicePrincipal --role "AcrPull" --scope <AZURE_CONTAINER_REGISTRY_ID>
+az role assignment create --assignee-object-id <AZURE_IDENTITY_PRINCIPAL_ID> --assignee-principal-type ServicePrincipal --role "Storage Blob Data Contributor" --scope <AZURE_STORAGE_ACCOUNT_ID>
+```
+
+Después, tú:
+
+```bat
+azd deploy
+```
+
+En la opción B usa `azd provision` y luego `azd deploy`, no `azd up`: sin los roles, la app no puede bajar su imagen del registro ni leer el Storage. Los roles se crean una sola vez; los `azd provision` posteriores no los tocan mientras `ASIGNAR_ROLES` siga en `false`.
+
 **Activar el acceso al back con Entra ID.** El registro de aplicación necesita la URL de la app, por eso se hace después del primer `azd up`:
 
 ```bat
