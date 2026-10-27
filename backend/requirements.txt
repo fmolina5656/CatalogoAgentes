@@ -1,0 +1,8 @@
+fastapi==0.162.0
+uvicorn[standard]==0.38.0
+pydantic==2.14.1
+pillow==13.0.0
+python-multipart==0.0.32
+azure-identity==1.27.0
+azure-storage-blob==12.31.0
+azure-monitor-opentelemetry==1.8.1

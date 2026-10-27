@@ -1,0 +1,594 @@
+[
+  {
+    "slug": "conciliacion-contable",
+    "nombre": "Conciliación contable",
+    "familia": "app-modernization",
+    "subfamilia": "foundry",
+    "tagline": "Convierte extractos PDF de 9 brokers en un Excel listo para cargar en SAP HANA.",
+    "glitch_dice": "Antes alguien copiaba a mano los extractos de nueve brokers. Ahora yo los leo, los cuadro y le dejo al equipo contable solo lo que no cuadra. Cero dedazos.",
+    "problema": "Cada broker manda su extracto en PDF con un formato distinto. El equipo contable los capturaba a mano en Excel para cargarlos a SAP HANA: horas de trabajo repetitivo, errores de captura y cierres que se atrasaban.",
+    "que_hace": "Lee los extractos de los 9 brokers, extrae movimientos, saldos y comisiones, los normaliza a un solo formato, aplica las reglas de conciliación y genera el Excel con el layout de carga de SAP HANA. Lo que no cuadra lo marca para revisión humana.",
+    "pasos": [
+      "El equipo deja los extractos PDF del periodo en la carpeta de entrada.",
+      "Document Intelligence extrae tablas y campos con un modelo entrenado por broker.",
+      "GPT-4o normaliza conceptos, fechas y montos a un solo formato.",
+      "El servicio .NET aplica las reglas contables, concilia y guarda el historial en Cosmos DB.",
+      "Un analista revisa solo las excepciones marcadas.",
+      "Se genera el Excel con el formato de carga de SAP HANA."
+    ],
+    "para_quien": ["Contraloría", "Equipo contable", "Tesorería"],
+    "industrias": ["Servicios financieros"],
+    "beneficios": [
+      {"texto": "La captura manual de extractos se elimina: el equipo solo revisa excepciones.", "tipo": "estimado"},
+      {"texto": "Un solo formato para los 9 brokers, listo para SAP HANA.", "tipo": "estimado"},
+      {"texto": "Trazabilidad de cada movimiento: de qué PDF y qué página salió.", "tipo": "estimado"}
+    ],
+    "plataforma": "Microsoft Foundry",
+    "tecnologias": ["Azure AI Document Intelligence", "GPT-4o", ".NET", "Azure Cosmos DB"],
+    "integraciones": ["SAP HANA", "Excel"],
+    "requisitos_licencias": "Suscripción de Azure con Document Intelligence y un despliegue de GPT-4o en Foundry. Ejemplos de extractos de cada broker para entrenar los modelos.",
+    "seguridad_gobierno": "Los documentos se procesan dentro de la suscripción del cliente. Acceso con Microsoft Entra ID e historial de cada conciliación en Cosmos DB para auditoría.",
+    "modelos": ["GPT-4o"],
+    "tipo_agente": "uno",
+    "conocimiento": ["Reglas de conciliación del equipo contable", "Catálogo de cuentas y conceptos por broker"],
+    "herramientas": ["Document Intelligence con modelos personalizados por broker", "Generador de Excel con layout de SAP HANA"],
+    "guardrails": ["Validación de que débitos y créditos cuadran antes de exportar", "Revisión humana obligatoria de excepciones"],
+    "evaluacion_observabilidad": "Comparación contra conciliaciones hechas a mano en los primeros cierres y bitácora de cada ejecución.",
+    "arquitectura": {
+      "componentes": [
+        {"id": "pdfs", "nombre": "Extractos PDF de 9 brokers", "tipo": "entrada", "detalle": "Cada broker con su propio formato. Llegan una vez por periodo."},
+        {"id": "docintel", "nombre": "Document Intelligence", "tipo": "ia", "detalle": "Modelos personalizados por broker que extraen tablas, saldos y comisiones."},
+        {"id": "gpt", "nombre": "GPT-4o", "tipo": "ia", "detalle": "Normaliza conceptos, fechas y montos a un solo formato."},
+        {"id": "api", "nombre": "Servicio de conciliación .NET", "tipo": "codigo", "detalle": "Aplica las reglas contables, concilia y arma el archivo de salida."},
+        {"id": "cosmos", "nombre": "Cosmos DB", "tipo": "datos", "detalle": "Historial de cada conciliación para auditoría y trazabilidad."},
+        {"id": "analista", "nombre": "Analista contable", "tipo": "persona", "detalle": "Revisa solo lo que el agente marcó como excepción."},
+        {"id": "excel", "nombre": "Excel para SAP HANA", "tipo": "salida", "detalle": "Archivo con el layout exacto de carga."}
+      ],
+      "conexiones": [["pdfs", "docintel"], ["docintel", "gpt"], ["gpt", "api"], ["api", "cosmos"], ["api", "analista"], ["analista", "excel"], ["api", "excel"]],
+      "pasos": [
+        {"texto": "Llegan los extractos PDF del periodo, uno por broker.", "componentes": ["pdfs"]},
+        {"texto": "Document Intelligence extrae tablas y campos con el modelo de cada broker.", "componentes": ["docintel"]},
+        {"texto": "GPT-4o lo normaliza todo a un solo formato.", "componentes": ["gpt"]},
+        {"texto": "El servicio .NET concilia y guarda el historial.", "componentes": ["api", "cosmos"]},
+        {"texto": "El analista revisa solo las excepciones.", "componentes": ["analista"]},
+        {"texto": "Sale el Excel listo para cargar en SAP HANA.", "componentes": ["excel"]}
+      ]
+    },
+    "tiempo_implementacion": "10 semanas",
+    "madurez": "produccion",
+    "estado": "publicado",
+    "destacado": true,
+    "es_ejemplo": false
+  },
+  {
+    "slug": "planes-de-mantenimiento-industrial",
+    "nombre": "Planes de mantenimiento industrial",
+    "familia": "app-modernization",
+    "subfamilia": "foundry",
+    "tagline": "De manuales técnicos en varios idiomas al plan preventivo y los repuestos para SAP.",
+    "glitch_dice": "Me leo los manuales de los equipos, aunque vengan en alemán o en chino, y armo el plan de mantenimiento con sus repuestos. Los ingenieros solo lo validan.",
+    "problema": "Cada equipo nuevo llega con manuales de cientos de páginas, muchas veces en otro idioma. Armar su plan preventivo y su lista de repuestos tomaba semanas de ingeniería antes de poder darlo de alta en SAP.",
+    "que_hace": "Lee los manuales técnicos en cualquier idioma, identifica tareas de mantenimiento, frecuencias y repuestos, y propone el plan preventivo en el formato de SAP. El ingeniero lo revisa y aprueba desde una aplicación web.",
+    "pasos": [
+      "El ingeniero sube los manuales del equipo en la aplicación web.",
+      "Document Intelligence extrae el texto, las tablas y la estructura del manual.",
+      "El agente en Foundry identifica tareas, frecuencias y repuestos, y los traduce al español.",
+      "La aplicación arma el plan preventivo y la lista de materiales con el formato de SAP.",
+      "El ingeniero revisa, ajusta y aprueba antes de cargarlo."
+    ],
+    "para_quien": ["Ingeniería de mantenimiento", "Planeación de mantenimiento", "Almacén de refacciones"],
+    "industrias": ["Manufactura", "Industria"],
+    "beneficios": [
+      {"texto": "El primer borrador del plan sale en horas en vez de semanas.", "tipo": "estimado"},
+      {"texto": "Manuales en cualquier idioma, plan siempre en español.", "tipo": "estimado"},
+      {"texto": "Repuestos identificados desde el día uno para planear inventario.", "tipo": "estimado"}
+    ],
+    "plataforma": "Microsoft Foundry",
+    "tecnologias": ["Microsoft Foundry", "Azure AI Document Intelligence", "Azure App Service"],
+    "integraciones": ["SAP PM"],
+    "requisitos_licencias": "Suscripción de Azure con Foundry, Document Intelligence y App Service. Acceso a los manuales técnicos de los equipos y al formato de carga de SAP del cliente.",
+    "seguridad_gobierno": "Acceso con Microsoft Entra ID. El ingeniero aprueba cada plan antes de que llegue a SAP: el agente propone, la persona decide.",
+    "modelos": ["Modelo GPT del catálogo de Foundry"],
+    "tipo_agente": "uno",
+    "conocimiento": ["Manuales técnicos de los equipos", "Formato de planes y materiales de SAP"],
+    "herramientas": ["Document Intelligence (layout)", "Traducción con el modelo", "Generador del plan en formato SAP"],
+    "guardrails": ["Aprobación humana antes de exportar", "Cada tarea enlaza a la página del manual de donde salió"],
+    "evaluacion_observabilidad": "Revisión de planes generados contra planes hechos por ingeniería en equipos de referencia.",
+    "arquitectura": {
+      "componentes": [
+        {"id": "manuales", "nombre": "Manuales técnicos multiidioma", "tipo": "entrada", "detalle": "PDF de cientos de páginas, en el idioma del fabricante."},
+        {"id": "docintel", "nombre": "Document Intelligence", "tipo": "ia", "detalle": "Extrae texto, tablas y estructura del manual."},
+        {"id": "agente", "nombre": "Agente en Foundry", "tipo": "ia", "detalle": "Identifica tareas, frecuencias y repuestos, y los traduce al español."},
+        {"id": "web", "nombre": "Aplicación web en App Service", "tipo": "codigo", "detalle": "Carga de manuales, revisión del plan y exportación."},
+        {"id": "ingeniero", "nombre": "Ingeniero de mantenimiento", "tipo": "persona", "detalle": "Revisa, ajusta y aprueba el plan."},
+        {"id": "plan", "nombre": "Plan preventivo + repuestos para SAP", "tipo": "salida", "detalle": "Listo para cargar en SAP PM."}
+      ],
+      "conexiones": [["manuales", "web"], ["web", "docintel"], ["docintel", "agente"], ["agente", "web"], ["web", "ingeniero"], ["ingeniero", "plan"]],
+      "pasos": [
+        {"texto": "El ingeniero sube los manuales a la aplicación.", "componentes": ["manuales", "web"]},
+        {"texto": "Document Intelligence los convierte en texto y tablas.", "componentes": ["docintel"]},
+        {"texto": "El agente encuentra tareas, frecuencias y repuestos.", "componentes": ["agente"]},
+        {"texto": "El ingeniero revisa y aprueba en la aplicación.", "componentes": ["web", "ingeniero"]},
+        {"texto": "Sale el plan con sus repuestos en formato SAP.", "componentes": ["plan"]}
+      ]
+    },
+    "tiempo_implementacion": "13 semanas",
+    "madurez": "piloto",
+    "estado": "publicado",
+    "destacado": true,
+    "es_ejemplo": false
+  },
+  {
+    "slug": "vision-en-tiendas",
+    "nombre": "Visión en tiendas",
+    "familia": "app-modernization",
+    "subfamilia": "foundry",
+    "tagline": "Mide filas, tiempos de atención y permanencia con las cámaras que la tienda ya tiene.",
+    "glitch_dice": "Las cámaras de la tienda ya estaban ahí, nomás nadie las veía. Yo cuento las filas y los tiempos de espera, y aviso cuando hay que abrir otra caja.",
+    "problema": "Las tiendas no sabían cuánto esperaba la gente en caja ni cuánto tiempo pasaba en cada zona. Las cámaras existían, pero solo servían para seguridad.",
+    "que_hace": "Analiza el video de las cámaras existentes para contar personas en fila, medir tiempos de atención y permanencia por zona, y mostrarlo en un tablero por tienda con alertas cuando la fila crece.",
+    "pasos": [
+      "Se definen las zonas de interés en cada cámara: cajas, pasillos y entrada.",
+      "Azure AI Vision detecta personas en cada zona.",
+      "El servicio calcula filas, tiempos de atención y permanencia.",
+      "Las métricas se guardan agregadas, sin identificar a nadie.",
+      "El tablero muestra la operación por tienda y manda alertas."
+    ],
+    "para_quien": ["Operaciones de tienda", "Gerentes de tienda", "Experiencia del cliente"],
+    "industrias": ["Retail"],
+    "beneficios": [
+      {"texto": "Se aprovecha la infraestructura de cámaras que ya existe.", "tipo": "estimado"},
+      {"texto": "Alertas para abrir caja antes de que la fila crezca.", "tipo": "estimado"},
+      {"texto": "Datos de permanencia por zona para decidir el acomodo.", "tipo": "estimado"}
+    ],
+    "plataforma": "Microsoft Foundry",
+    "tecnologias": ["Azure AI Vision"],
+    "integraciones": ["Cámaras IP existentes", "Tablero de operación"],
+    "requisitos_licencias": "Suscripción de Azure con Azure AI Vision. Acceso a las transmisiones de las cámaras y ancho de banda suficiente desde la tienda.",
+    "seguridad_gobierno": "Se trabaja con conteos y tiempos agregados por zona. Validar con el equipo legal del cliente el aviso de privacidad y la retención del video.",
+    "modelos": ["Azure AI Vision"],
+    "tipo_agente": "uno",
+    "conocimiento": ["Mapa de zonas por cámara y tienda"],
+    "herramientas": ["Detección de personas", "Cálculo de filas y permanencia"],
+    "guardrails": ["Solo métricas agregadas, sin identificar personas"],
+    "evaluacion_observabilidad": "Comparación de conteos automáticos contra conteos manuales en horas de muestra.",
+    "arquitectura": {
+      "componentes": [
+        {"id": "camaras", "nombre": "Cámaras existentes", "tipo": "entrada", "detalle": "Las mismas cámaras de seguridad de la tienda."},
+        {"id": "vision", "nombre": "Azure AI Vision", "tipo": "ia", "detalle": "Detecta personas en las zonas configuradas."},
+        {"id": "metricas", "nombre": "Cálculo de filas y tiempos", "tipo": "codigo", "detalle": "Convierte detecciones en filas, tiempos de atención y permanencia."},
+        {"id": "privacidad", "nombre": "Solo datos agregados", "tipo": "seguridad", "detalle": "Se guardan conteos y tiempos por zona, no personas."},
+        {"id": "datos", "nombre": "Métricas por tienda", "tipo": "datos", "detalle": "Histórico por tienda, zona y hora."},
+        {"id": "tablero", "nombre": "Tablero y alertas", "tipo": "salida", "detalle": "Vista por tienda y avisos cuando la fila crece."},
+        {"id": "gerente", "nombre": "Gerente de tienda", "tipo": "persona", "detalle": "Recibe la alerta y abre otra caja."}
+      ],
+      "conexiones": [["camaras", "vision"], ["vision", "metricas"], ["metricas", "privacidad"], ["privacidad", "datos"], ["datos", "tablero"], ["tablero", "gerente"]],
+      "pasos": [
+        {"texto": "Las cámaras de siempre mandan su video.", "componentes": ["camaras"]},
+        {"texto": "Azure AI Vision detecta personas en cada zona.", "componentes": ["vision"]},
+        {"texto": "Se calculan filas, atención y permanencia.", "componentes": ["metricas"]},
+        {"texto": "Solo se guardan datos agregados.", "componentes": ["privacidad", "datos"]},
+        {"texto": "El gerente ve el tablero y recibe alertas.", "componentes": ["tablero", "gerente"]}
+      ]
+    },
+    "tiempo_implementacion": "12 semanas",
+    "madurez": "piloto",
+    "estado": "publicado",
+    "destacado": false,
+    "es_ejemplo": false
+  },
+  {
+    "slug": "api-documental-de-tramites",
+    "nombre": "API documental de trámites",
+    "familia": "app-modernization",
+    "subfamilia": "foundry",
+    "tagline": "Recibe cualquier documento del trámite y lo manda al motor de IA que mejor lo lee.",
+    "glitch_dice": "Me llega de todo: identificaciones, comprobantes, formatos llenados a mano. Yo decido quién lo lee mejor y regreso los datos limpios en un solo formato.",
+    "problema": "Los trámites reciben muchos tipos de documento. Usar un solo modelo para todo salía caro y fallaba con los documentos raros; usar uno distinto para cada tipo era difícil de mantener.",
+    "que_hace": "Expone una API en .NET con 15 endpoints que recibe cada documento, identifica su tipo y lo enruta al motor adecuado: un modelo prebuilt de Document Intelligence, Content Understanding o GPT-4o para lo no estructurado. Siempre responde con el mismo esquema.",
+    "pasos": [
+      "El sistema de trámites manda el documento a la API.",
+      "La API identifica el tipo de documento.",
+      "Lo enruta a Document Intelligence prebuilt, Content Understanding o GPT-4o, según convenga.",
+      "Normaliza la respuesta a un esquema único.",
+      "Devuelve los datos con su nivel de confianza al sistema de trámites."
+    ],
+    "para_quien": ["Equipos de trámites y back office", "Arquitectura de TI", "Desarrollo"],
+    "industrias": ["Sector público", "Servicios financieros"],
+    "beneficios": [
+      {"texto": "Cada documento usa el motor más barato que lo lee bien.", "tipo": "estimado"},
+      {"texto": "Un solo contrato de API para todos los tipos de documento.", "tipo": "estimado"},
+      {"texto": "Agregar un tipo nuevo de documento no rompe a los sistemas que ya la usan.", "tipo": "estimado"}
+    ],
+    "plataforma": "Microsoft Foundry",
+    "tecnologias": [".NET", "Azure AI Document Intelligence", "Azure AI Content Understanding", "GPT-4o"],
+    "integraciones": ["Sistema de trámites del cliente (API REST)"],
+    "requisitos_licencias": "Suscripción de Azure con Document Intelligence, Content Understanding y un despliegue de GPT-4o en Foundry.",
+    "seguridad_gobierno": "API protegida con Microsoft Entra ID. Los documentos no se guardan más tiempo del necesario para procesarlos y cada llamada queda registrada.",
+    "modelos": ["GPT-4o", "Modelos prebuilt de Document Intelligence"],
+    "tipo_agente": "uno",
+    "conocimiento": ["Catálogo de tipos de documento y su esquema de salida"],
+    "herramientas": ["Document Intelligence prebuilt", "Content Understanding", "GPT-4o para documentos no estructurados"],
+    "guardrails": ["Nivel de confianza por campo", "Los datos con baja confianza se marcan para revisión"],
+    "evaluacion_observabilidad": "Conjunto de documentos de prueba por tipo y métricas por endpoint.",
+    "arquitectura": {
+      "componentes": [
+        {"id": "doc", "nombre": "Documento del trámite", "tipo": "entrada", "detalle": "Identificaciones, comprobantes, formatos y documentos libres."},
+        {"id": "api", "nombre": "API .NET (15 endpoints)", "tipo": "codigo", "detalle": "Identifica el tipo de documento y decide a qué motor mandarlo."},
+        {"id": "prebuilt", "nombre": "Document Intelligence prebuilt", "tipo": "ia", "detalle": "Para documentos estándar como identificaciones y facturas."},
+        {"id": "cu", "nombre": "Content Understanding", "tipo": "ia", "detalle": "Para documentos con estructura variable."},
+        {"id": "gpt", "nombre": "GPT-4o", "tipo": "ia", "detalle": "Para lo no estructurado o lo que los otros no resuelven."},
+        {"id": "json", "nombre": "Respuesta en esquema único", "tipo": "salida", "detalle": "Mismos campos y nivel de confianza, venga de donde venga."}
+      ],
+      "conexiones": [["doc", "api"], ["api", "prebuilt"], ["api", "cu"], ["api", "gpt"], ["prebuilt", "json"], ["cu", "json"], ["gpt", "json"]],
+      "pasos": [
+        {"texto": "Llega un documento a la API.", "componentes": ["doc", "api"]},
+        {"texto": "Si es un documento estándar, va a Document Intelligence prebuilt.", "componentes": ["prebuilt"]},
+        {"texto": "Si su estructura varía, va a Content Understanding.", "componentes": ["cu"]},
+        {"texto": "Si es libre o raro, lo lee GPT-4o.", "componentes": ["gpt"]},
+        {"texto": "La API responde siempre con el mismo esquema.", "componentes": ["json"]}
+      ]
+    },
+    "tiempo_implementacion": "10 semanas",
+    "madurez": "produccion",
+    "estado": "publicado",
+    "destacado": false,
+    "es_ejemplo": false
+  },
+  {
+    "slug": "triage-de-alertas-de-seguridad",
+    "nombre": "Triage de alertas de seguridad",
+    "familia": "app-modernization",
+    "subfamilia": "foundry",
+    "tagline": "Clasifica las alertas de seguridad y escala a Teams solo lo que de verdad es crítico.",
+    "glitch_dice": "Al equipo de seguridad le llovían alertas y la mitad eran ruido. Yo las leo todas, las clasifico y solo les toco la puerta en Teams cuando sí es urgente.",
+    "problema": "El equipo de seguridad recibía cientos de alertas al día de varias herramientas. Revisarlas una por una era imposible y las críticas se perdían entre el ruido.",
+    "que_hace": "Recibe las alertas, quita duplicados, las clasifica por severidad con GPT-4o y explica en lenguaje claro por qué. Las críticas se escalan a un canal de Teams con un resumen y los siguientes pasos sugeridos.",
+    "pasos": [
+      "Las herramientas de seguridad mandan sus alertas al servicio.",
+      "El servicio en Python agrupa y quita duplicados.",
+      "GPT-4o clasifica la severidad y resume cada alerta.",
+      "Las reglas de escalamiento deciden qué es crítico.",
+      "Lo crítico llega a Teams con un resumen; lo demás queda en la bitácora."
+    ],
+    "para_quien": ["Centro de operaciones de seguridad (SOC)", "Equipo de ciberseguridad", "TI"],
+    "industrias": ["Transversal"],
+    "beneficios": [
+      {"texto": "Menos ruido: el equipo ve primero lo crítico.", "tipo": "estimado"},
+      {"texto": "Cada alerta llega con un resumen en lenguaje claro.", "tipo": "estimado"},
+      {"texto": "Escalamiento inmediato al canal donde el equipo ya trabaja.", "tipo": "estimado"}
+    ],
+    "plataforma": "Microsoft Foundry",
+    "tecnologias": ["GPT-4o", "Python"],
+    "integraciones": ["Microsoft Teams", "Herramientas de monitoreo de seguridad"],
+    "requisitos_licencias": "Suscripción de Azure con un despliegue de GPT-4o en Foundry. Microsoft Teams y acceso a las fuentes de alertas.",
+    "seguridad_gobierno": "El agente clasifica y escala, pero no ejecuta acciones de remediación. Las reglas de escalamiento las define y revisa el equipo de seguridad.",
+    "modelos": ["GPT-4o"],
+    "tipo_agente": "uno",
+    "conocimiento": ["Reglas de escalamiento del SOC", "Historial de alertas"],
+    "herramientas": ["Deduplicación de alertas", "Publicación en canal de Teams"],
+    "guardrails": ["El agente no ejecuta acciones, solo clasifica y avisa", "Reglas de escalamiento deterministas sobre la clasificación"],
+    "evaluacion_observabilidad": "Muestreo semanal de clasificaciones revisado por el SOC.",
+    "arquitectura": {
+      "componentes": [
+        {"id": "alertas", "nombre": "Alertas de seguridad", "tipo": "entrada", "detalle": "De las herramientas de monitoreo del cliente."},
+        {"id": "servicio", "nombre": "Servicio en Python", "tipo": "codigo", "detalle": "Recibe, agrupa y quita duplicados."},
+        {"id": "gpt", "nombre": "GPT-4o", "tipo": "ia", "detalle": "Clasifica la severidad y resume en lenguaje claro."},
+        {"id": "reglas", "nombre": "Reglas de escalamiento", "tipo": "seguridad", "detalle": "Definidas por el SOC; deciden qué se escala."},
+        {"id": "bitacora", "nombre": "Bitácora", "tipo": "datos", "detalle": "Todas las alertas con su clasificación."},
+        {"id": "teams", "nombre": "Canal de Teams", "tipo": "salida", "detalle": "Solo lo crítico, con resumen y pasos sugeridos."},
+        {"id": "soc", "nombre": "Analista del SOC", "tipo": "persona", "detalle": "Atiende lo crítico primero."}
+      ],
+      "conexiones": [["alertas", "servicio"], ["servicio", "gpt"], ["gpt", "reglas"], ["reglas", "teams"], ["reglas", "bitacora"], ["teams", "soc"]],
+      "pasos": [
+        {"texto": "Entran las alertas de todas las herramientas.", "componentes": ["alertas"]},
+        {"texto": "El servicio agrupa y quita duplicados.", "componentes": ["servicio"]},
+        {"texto": "GPT-4o clasifica y resume cada una.", "componentes": ["gpt"]},
+        {"texto": "Las reglas deciden qué se escala.", "componentes": ["reglas", "bitacora"]},
+        {"texto": "Lo crítico llega a Teams y el SOC lo atiende.", "componentes": ["teams", "soc"]}
+      ]
+    },
+    "tiempo_implementacion": "9 semanas",
+    "madurez": "produccion",
+    "estado": "publicado",
+    "destacado": false,
+    "es_ejemplo": false
+  },
+  {
+    "slug": "equipo-de-agentes-que-disena-soluciones",
+    "nombre": "Equipo de agentes que diseña soluciones",
+    "familia": "app-modernization",
+    "subfamilia": "foundry",
+    "tagline": "Una recepcionista de voz escucha tu reto y 5 agentes lo debaten hasta proponer una solución.",
+    "glitch_dice": "Cuéntale tu problema a la recepcionista y mira cómo cinco agentes se ponen a discutir. Ni en junta de lunes se ponen tan de acuerdo.",
+    "problema": "Mostrar en un evento cómo colaboran varios agentes es difícil: con un solo chat no se nota la diferencia entre un agente y un equipo de agentes.",
+    "que_hace": "Una recepcionista de voz conversa con el visitante y entiende su reto. Después, cinco agentes especialistas lo debaten, se contradicen y llegan a una propuesta de solución con su arquitectura, que se muestra en pantalla.",
+    "pasos": [
+      "El visitante le cuenta su reto en voz a la recepcionista.",
+      "Prompt Shields revisa la entrada antes de que llegue a los agentes.",
+      "Microsoft Agent Framework orquesta a los 5 agentes especialistas.",
+      "Los agentes debaten y llegan a una propuesta.",
+      "La propuesta aparece en pantalla con su arquitectura."
+    ],
+    "para_quien": ["Líderes de negocio", "Arquitectos de soluciones", "Asistentes a eventos"],
+    "industrias": ["Transversal"],
+    "beneficios": [
+      {"texto": "Hace visible cómo colaboran varios agentes, no solo uno.", "tipo": "estimado"},
+      {"texto": "Conversación por voz: nadie tiene que escribir nada.", "tipo": "estimado"}
+    ],
+    "plataforma": "Microsoft Foundry",
+    "tecnologias": ["Microsoft Agent Framework", "gpt-5.4", "Prompt Shields", "Azure Container Apps"],
+    "integraciones": [],
+    "requisitos_licencias": "Suscripción de Azure con Foundry (gpt-5.4 y voz), Azure AI Content Safety y Azure Container Apps.",
+    "seguridad_gobierno": "Prompt Shields filtra la entrada de voz antes de que llegue a los agentes. No se guardan datos personales de los visitantes.",
+    "modelos": ["gpt-5.4"],
+    "tipo_agente": "varios",
+    "conocimiento": ["Catálogo de servicios y arquitecturas de referencia de Readymind"],
+    "herramientas": ["Agente de voz (recepcionista)", "Debate entre agentes especialistas"],
+    "guardrails": ["Prompt Shields", "Content Safety"],
+    "evaluacion_observabilidad": "Trazas de la conversación entre agentes con Application Insights.",
+    "arquitectura": {
+      "componentes": [
+        {"id": "visitante", "nombre": "Visitante", "tipo": "persona", "detalle": "Cuenta su reto hablando."},
+        {"id": "recepcion", "nombre": "Recepcionista de voz", "tipo": "ia", "detalle": "Agente de voz que conversa y resume el reto."},
+        {"id": "shields", "nombre": "Prompt Shields", "tipo": "seguridad", "detalle": "Detecta intentos de manipular a los agentes."},
+        {"id": "maf", "nombre": "Microsoft Agent Framework", "tipo": "codigo", "detalle": "Orquesta los turnos del debate entre agentes."},
+        {"id": "equipo", "nombre": "5 agentes especialistas", "tipo": "ia", "detalle": "Debaten con gpt-5.4, cada uno desde su especialidad."},
+        {"id": "aca", "nombre": "Azure Container Apps", "tipo": "codigo", "detalle": "Donde corre todo el equipo de agentes."},
+        {"id": "propuesta", "nombre": "Propuesta en pantalla", "tipo": "salida", "detalle": "Solución con su arquitectura."}
+      ],
+      "conexiones": [["visitante", "recepcion"], ["recepcion", "shields"], ["shields", "maf"], ["maf", "equipo"], ["equipo", "maf"], ["maf", "propuesta"], ["aca", "maf"]],
+      "pasos": [
+        {"texto": "El visitante habla con la recepcionista.", "componentes": ["visitante", "recepcion"]},
+        {"texto": "Prompt Shields revisa lo que dijo.", "componentes": ["shields"]},
+        {"texto": "Agent Framework reparte el reto a los especialistas.", "componentes": ["maf", "aca"]},
+        {"texto": "Los 5 agentes debaten.", "componentes": ["equipo"]},
+        {"texto": "Sale la propuesta en pantalla.", "componentes": ["propuesta"]}
+      ]
+    },
+    "tiempo_implementacion": "Demo del AI Tour",
+    "madurez": "demo",
+    "estado": "publicado",
+    "destacado": true,
+    "es_ejemplo": false
+  },
+  {
+    "slug": "evaluacion-del-portafolio-de-aplicaciones",
+    "nombre": "Evaluación del portafolio de aplicaciones",
+    "familia": "app-modernization",
+    "subfamilia": "modernizacion",
+    "tagline": "Inventario y ruta de modernización de todas tus aplicaciones, priorizada por valor y esfuerzo.",
+    "glitch_dice": "Antes de mover una sola app, hay que saber qué tienes. Reviso el código y las dependencias y te digo por dónde empezar sin que nada truene.",
+    "problema": "Las empresas tienen decenas de aplicaciones heredadas y no saben cuáles migrar primero, cuánto cuesta cada una ni qué riesgos tienen.",
+    "que_hace": "Analiza el código y las dependencias de cada aplicación con herramientas de evaluación y GitHub Copilot, y entrega un mapa del portafolio con la estrategia sugerida para cada app y una ruta priorizada.",
+    "pasos": [
+      "Se hace el inventario de aplicaciones y repositorios.",
+      "Se evalúa cada aplicación: framework, dependencias y bloqueos para Azure.",
+      "GitHub Copilot ayuda a resumir el código y estimar el esfuerzo.",
+      "Se asigna una estrategia por app: rehospedar, replataformar o refactorizar.",
+      "Se entrega la ruta priorizada por valor y esfuerzo."
+    ],
+    "para_quien": ["CIO", "Arquitectura empresarial", "Líderes de desarrollo"],
+    "industrias": ["Transversal"],
+    "beneficios": [
+      {"texto": "Decisiones de migración basadas en el código real, no en suposiciones.", "tipo": "estimado"},
+      {"texto": "Una ruta priorizada para empezar por lo que más valor da.", "tipo": "estimado"}
+    ],
+    "plataforma": "GitHub Copilot",
+    "tecnologias": ["GitHub Copilot", "Azure Migrate", "GitHub Copilot app modernization"],
+    "integraciones": ["Repositorios de código del cliente"],
+    "requisitos_licencias": "Licencias de GitHub Copilot para el equipo y acceso de lectura a los repositorios.",
+    "seguridad_gobierno": "El análisis se hace sobre los repositorios del cliente con sus políticas de GitHub Copilot.",
+    "tiempo_implementacion": "4 a 6 semanas (estimado)",
+    "madurez": "piloto",
+    "estado": "publicado",
+    "destacado": false,
+    "es_ejemplo": true
+  },
+  {
+    "slug": "migracion-net-y-java-con-github-copilot",
+    "nombre": "Migración de .NET Framework y Java con GitHub Copilot",
+    "familia": "app-modernization",
+    "subfamilia": "modernizacion",
+    "tagline": "Lleva apps de .NET Framework a .NET moderno y actualiza versiones de Java con GitHub Copilot app modernization.",
+    "glitch_dice": "Esa app de .NET Framework que nadie quiere tocar… la pasamos a .NET moderno con Copilot haciendo el trabajo pesado y pruebas para que nada se rompa.",
+    "problema": "Las aplicaciones en .NET Framework o en versiones viejas de Java ya no reciben soporte, son difíciles de contenerizar y frenan la llegada a la nube.",
+    "que_hace": "Usa GitHub Copilot app modernization para evaluar, planear y ejecutar la actualización del código: dependencias, APIs obsoletas y configuración. Se generan pruebas para validar que la app se comporta igual y se deja lista para contenerizar en Azure Container Apps o AKS.",
+    "pasos": [
+      "GitHub Copilot app modernization evalúa el proyecto y propone un plan.",
+      "Se actualizan dependencias y APIs obsoletas paso a paso.",
+      "Se generan pruebas para comparar el comportamiento antes y después.",
+      "Se contenedoriza la aplicación.",
+      "Se despliega en Azure Container Apps o AKS."
+    ],
+    "para_quien": ["Equipos de desarrollo", "Arquitectura de aplicaciones"],
+    "industrias": ["Transversal"],
+    "beneficios": [
+      {"texto": "Menos tiempo de migración que hacerlo todo a mano.", "tipo": "estimado"},
+      {"texto": "Pruebas que quedan para el mantenimiento futuro.", "tipo": "estimado"}
+    ],
+    "plataforma": "GitHub Copilot",
+    "tecnologias": ["GitHub Copilot app modernization", ".NET", "Java", "Azure Container Apps", "AKS"],
+    "integraciones": ["GitHub", "Azure DevOps"],
+    "requisitos_licencias": "Licencias de GitHub Copilot y suscripción de Azure para el destino.",
+    "seguridad_gobierno": "Cada cambio pasa por pull request y revisión del equipo antes de integrarse.",
+    "arquitectura": {
+      "componentes": [
+        {"id": "legado", "nombre": "App en .NET Framework / Java antiguo", "tipo": "entrada", "detalle": "El código actual en su repositorio."},
+        {"id": "copilot", "nombre": "GitHub Copilot app modernization", "tipo": "ia", "detalle": "Evalúa, planea y aplica los cambios de actualización."},
+        {"id": "dev", "nombre": "Equipo de desarrollo", "tipo": "persona", "detalle": "Revisa cada cambio en pull requests."},
+        {"id": "pruebas", "nombre": "Pruebas generadas", "tipo": "codigo", "detalle": "Comparan el comportamiento antes y después."},
+        {"id": "contenedor", "nombre": "Contenedor", "tipo": "codigo", "detalle": "Imagen lista para la nube."},
+        {"id": "azure", "nombre": "Azure Container Apps o AKS", "tipo": "salida", "detalle": "Destino de la aplicación modernizada."}
+      ],
+      "conexiones": [["legado", "copilot"], ["copilot", "dev"], ["dev", "pruebas"], ["pruebas", "contenedor"], ["contenedor", "azure"]],
+      "pasos": [
+        {"texto": "Copilot evalúa la app y propone un plan.", "componentes": ["legado", "copilot"]},
+        {"texto": "El equipo revisa cada cambio.", "componentes": ["dev"]},
+        {"texto": "Las pruebas confirman que nada se rompió.", "componentes": ["pruebas"]},
+        {"texto": "La app se contenedoriza y se despliega en Azure.", "componentes": ["contenedor", "azure"]}
+      ]
+    },
+    "tiempo_implementacion": "6 a 10 semanas por aplicación (estimado)",
+    "madurez": "piloto",
+    "estado": "publicado",
+    "destacado": false,
+    "es_ejemplo": true
+  },
+  {
+    "slug": "documentacion-de-legado-y-pruebas",
+    "nombre": "Documentación de código legado y generación de pruebas",
+    "familia": "app-modernization",
+    "subfamilia": "modernizacion",
+    "tagline": "Explica el código que nadie entiende y le pone pruebas antes de tocarlo.",
+    "glitch_dice": "Ese sistema que solo entendía alguien que ya se fue: lo documento, le pongo pruebas y ya lo puede mantener cualquiera.",
+    "problema": "Hay sistemas críticos sin documentación ni pruebas. Nadie se atreve a cambiarlos y cada ajuste es un riesgo.",
+    "que_hace": "Con GitHub Copilot se genera documentación del código, diagramas y pruebas unitarias. Así se reduce el riesgo antes de modernizar o de migrar la base de datos a Azure SQL.",
+    "pasos": [
+      "Se recorre el repositorio y se identifican los módulos críticos.",
+      "Copilot genera documentación y explicaciones de cada módulo.",
+      "Se generan pruebas unitarias y se revisan con el equipo.",
+      "Queda una base segura para modernizar o migrar a Azure SQL."
+    ],
+    "para_quien": ["Equipos de desarrollo", "Mantenimiento de aplicaciones"],
+    "industrias": ["Transversal"],
+    "beneficios": [
+      {"texto": "Menos dependencia de una sola persona que conoce el sistema.", "tipo": "estimado"},
+      {"texto": "Cambios con menos riesgo gracias a las pruebas.", "tipo": "estimado"}
+    ],
+    "plataforma": "GitHub Copilot",
+    "tecnologias": ["GitHub Copilot", "Azure SQL"],
+    "integraciones": ["GitHub", "Azure DevOps"],
+    "requisitos_licencias": "Licencias de GitHub Copilot.",
+    "seguridad_gobierno": "La documentación y las pruebas se integran por pull request con revisión humana.",
+    "tiempo_implementacion": "3 a 5 semanas (estimado)",
+    "madurez": "demo",
+    "estado": "publicado",
+    "destacado": false,
+    "es_ejemplo": true
+  },
+  {
+    "slug": "asistente-de-politicas-en-teams",
+    "nombre": "Asistente de políticas internas en Teams",
+    "familia": "m365-copilot",
+    "tagline": "Un agente declarativo que responde dudas de políticas internas citando el documento.",
+    "glitch_dice": "¿Cuántos días de vacaciones te tocan? ¿Qué gastos se reembolsan? Pregúntame en Teams y te contesto con el documento oficial.",
+    "problema": "Las políticas internas viven en decenas de documentos en SharePoint y la gente termina preguntando lo mismo por correo a RR. HH. o Finanzas.",
+    "que_hace": "Un agente declarativo de Microsoft 365 Copilot que responde preguntas sobre políticas internas desde Teams y cita el documento de SharePoint de donde sale cada respuesta.",
+    "pasos": [
+      "Se seleccionan los sitios de SharePoint con las políticas vigentes.",
+      "Se configura el agente declarativo con sus instrucciones y fuentes.",
+      "El colaborador pregunta en Teams o en Copilot Chat.",
+      "El agente responde y cita el documento."
+    ],
+    "para_quien": ["Recursos Humanos", "Finanzas", "Todos los colaboradores"],
+    "industrias": ["Transversal"],
+    "beneficios": [
+      {"texto": "Menos correos repetidos a RR. HH. y Finanzas.", "tipo": "estimado"},
+      {"texto": "Respuestas con la fuente oficial a la mano.", "tipo": "estimado"}
+    ],
+    "plataforma": "Microsoft 365 Copilot",
+    "tecnologias": ["Agentes declarativos", "SharePoint", "Microsoft Teams"],
+    "integraciones": ["SharePoint", "Microsoft Teams", "Outlook"],
+    "requisitos_licencias": "Licencias de Microsoft 365 Copilot para los usuarios del agente.",
+    "seguridad_gobierno": "Respeta los permisos de SharePoint: cada persona solo ve respuestas de documentos a los que ya tiene acceso.",
+    "tiempo_implementacion": "2 a 3 semanas (estimado)",
+    "madurez": "demo",
+    "estado": "publicado",
+    "destacado": false,
+    "es_ejemplo": true
+  },
+  {
+    "slug": "propuestas-comerciales-en-word",
+    "nombre": "Propuestas comerciales en Word",
+    "familia": "m365-copilot",
+    "tagline": "Arma el primer borrador de una propuesta en Word con tus plantillas y casos anteriores.",
+    "glitch_dice": "Dame el nombre de la oportunidad y te dejo un borrador de propuesta en Word con su estructura, alcance y casos parecidos. Tú le pones el toque final.",
+    "problema": "Cada propuesta comercial empieza desde cero o desde una copia de otra, con riesgo de dejar datos de otro cliente.",
+    "que_hace": "Un agente de Microsoft 365 Copilot que, a partir de la oportunidad, genera en Word un borrador con la plantilla oficial, el alcance y referencias a propuestas anteriores guardadas en SharePoint.",
+    "pasos": [
+      "El vendedor le pide al agente una propuesta para una oportunidad.",
+      "El agente busca plantillas y propuestas parecidas en SharePoint.",
+      "Genera el borrador en Word con la estructura oficial.",
+      "El vendedor revisa y ajusta antes de enviar."
+    ],
+    "para_quien": ["Ventas", "Preventa"],
+    "industrias": ["Transversal"],
+    "beneficios": [
+      {"texto": "Primer borrador en minutos.", "tipo": "estimado"},
+      {"texto": "Siempre con la plantilla y el tono oficiales.", "tipo": "estimado"}
+    ],
+    "plataforma": "Microsoft 365 Copilot",
+    "tecnologias": ["Agentes declarativos", "Word", "SharePoint"],
+    "integraciones": ["SharePoint", "Word", "Teams"],
+    "requisitos_licencias": "Licencias de Microsoft 365 Copilot.",
+    "seguridad_gobierno": "Usa solo documentos a los que el vendedor ya tiene acceso. La revisión humana antes de enviar es obligatoria.",
+    "tiempo_implementacion": "3 a 4 semanas (estimado)",
+    "madurez": "demo",
+    "estado": "publicado",
+    "destacado": false,
+    "es_ejemplo": true
+  },
+  {
+    "slug": "help-desk-de-ti",
+    "nombre": "Help desk de TI",
+    "familia": "copilot-studio",
+    "tagline": "Resuelve dudas de TI en Teams y abre el ticket cuando hace falta.",
+    "glitch_dice": "¿Se te bloqueó la cuenta o no jala la VPN? Pregúntame en Teams. Si no lo resuelvo yo, te abro el ticket con todo lo que ya me contaste.",
+    "problema": "La mesa de ayuda recibe muchas preguntas repetidas y los tickets llegan sin la información necesaria para atenderlos.",
+    "que_hace": "Un agente de Copilot Studio en Teams que responde preguntas frecuentes de TI con la base de conocimiento y, si no puede resolver, abre el ticket con Power Automate y un resumen del caso.",
+    "pasos": [
+      "El colaborador escribe su problema en Teams.",
+      "El agente busca la solución en la base de conocimiento.",
+      "Si se resuelve, se cierra la conversación.",
+      "Si no, Power Automate abre el ticket con el resumen."
+    ],
+    "para_quien": ["Mesa de ayuda", "Todos los colaboradores"],
+    "industrias": ["Transversal"],
+    "beneficios": [
+      {"texto": "Menos tickets por dudas frecuentes.", "tipo": "estimado"},
+      {"texto": "Tickets que llegan completos desde el inicio.", "tipo": "estimado"}
+    ],
+    "plataforma": "Copilot Studio",
+    "tecnologias": ["Copilot Studio", "Power Automate"],
+    "integraciones": ["Microsoft Teams", "ServiceNow", "SharePoint"],
+    "requisitos_licencias": "Licencia de Copilot Studio (mensajes) y Power Automate para los flujos.",
+    "seguridad_gobierno": "Autenticación con Microsoft Entra ID y entornos de Power Platform con políticas de datos (DLP).",
+    "tiempo_implementacion": "4 a 6 semanas (estimado)",
+    "madurez": "piloto",
+    "estado": "publicado",
+    "destacado": false,
+    "es_ejemplo": true
+  },
+  {
+    "slug": "onboarding-de-colaboradores",
+    "nombre": "Onboarding de colaboradores",
+    "familia": "copilot-studio",
+    "tagline": "Acompaña a cada persona nueva en su primer mes: dudas, trámites y pendientes.",
+    "glitch_dice": "Primer día y no sabes ni dónde está la impresora. Tranqui: yo te guío con los trámites, te recuerdo pendientes y te presento con quien necesitas.",
+    "problema": "Las personas nuevas reciben mucha información de golpe y RR. HH. responde las mismas preguntas en cada ingreso.",
+    "que_hace": "Un agente de Copilot Studio que guía al nuevo colaborador en su primer mes: responde dudas, le recuerda trámites pendientes y dispara flujos de Power Automate para solicitar equipo y accesos.",
+    "pasos": [
+      "RR. HH. da de alta al colaborador y se activa el agente.",
+      "El agente le da la bienvenida en Teams con su plan del primer mes.",
+      "Responde dudas con la información de RR. HH.",
+      "Dispara flujos para solicitar equipo y accesos."
+    ],
+    "para_quien": ["Recursos Humanos", "Nuevos colaboradores", "Líderes de equipo"],
+    "industrias": ["Transversal"],
+    "beneficios": [
+      {"texto": "Una experiencia de ingreso igual para todos.", "tipo": "estimado"},
+      {"texto": "Menos tiempo de RR. HH. en preguntas repetidas.", "tipo": "estimado"}
+    ],
+    "plataforma": "Copilot Studio",
+    "tecnologias": ["Copilot Studio", "Power Automate"],
+    "integraciones": ["Microsoft Teams", "SharePoint", "Sistema de RR. HH."],
+    "requisitos_licencias": "Licencia de Copilot Studio y Power Automate.",
+    "seguridad_gobierno": "Acceso con Microsoft Entra ID; los datos personales se quedan en el sistema de RR. HH.",
+    "tiempo_implementacion": "4 a 6 semanas (estimado)",
+    "madurez": "demo",
+    "estado": "publicado",
+    "destacado": false,
+    "es_ejemplo": true
+  }
+]

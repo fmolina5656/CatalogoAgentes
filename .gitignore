@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/
+/capturas/
+node_modules/
+frontend/dist/
+.azure/
+.env
+*.local
+*.tsbuildinfo
+e2e/node_modules/

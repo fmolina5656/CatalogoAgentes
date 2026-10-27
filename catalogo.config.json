@@ -1,0 +1,95 @@
+{
+  "nombre": "Catálogo de agentes",
+  "organizacion": "Readymind",
+  "descripcion": "Agentes de IA y modernización que Readymind construye sobre Microsoft: pro-code con Foundry y low code con Microsoft 365 Copilot y Copilot Studio.",
+  "idioma": "es-MX",
+  "logo": {
+    "oscuro": "/brand/readymind-logo-dark.png",
+    "claro": "/brand/readymind-logo.png",
+    "alt": "Readymind"
+  },
+  "favicon": "/favicon.svg",
+  "mascota": {
+    "nombre": "Glitch",
+    "imagen": "/brand/glitch-open.webp",
+    "imagen_parpadeo": "/brand/glitch-blink.webp",
+    "alt": "Glitch, la mascota de Readymind: un personaje verde y redondo con un chip en la cabeza"
+  },
+  "paleta": {
+    "verde": "#66de7f",
+    "teal": "#53b6ad",
+    "azul": "#397ef6",
+    "degradado": "linear-gradient(90deg, #66de7f 0%, #53b6ad 50%, #397ef6 100%)",
+    "texto_sobre_degradado": "#04121b",
+    "fondo": "#050a12",
+    "tarjeta": "#0c1626",
+    "linea": "#1f3150",
+    "linea_2": "#2a4268",
+    "texto": "#f3f6fa",
+    "texto_2": "#b7c2d2",
+    "texto_3": "#7d8ca2",
+    "alerta": "#ffb547",
+    "error": "#ff7a7a"
+  },
+  "glitch": {
+    "portada": [
+      "¡Qué onda! Soy Glitch. Aquí están los agentes que en Readymind ya construimos sobre Microsoft, con lo que hacen, cómo funcionan y cuánto tardan en salir.",
+      "Los de App Modernization son los pesados: agentes a medida con Foundry y modernización de apps con IA. Los de low code viven en Microsoft 365 Copilot y Copilot Studio.",
+      "Filtra, pícale a uno y te cuento el chisme completo."
+    ],
+    "sin_resultados": "Mmm, con esos filtros no encontré nada. Quita alguno y lo vuelvo a intentar.",
+    "presentacion": "Te presento los agentes de Readymind. Avanza con clic o con las flechas, aquí nada pasa solo.",
+    "cierre": "¿Te late alguno? Escríbenos y lo aterrizamos a tu caso."
+  },
+  "familias": [
+    {
+      "id": "app-modernization",
+      "nombre": "App Modernization",
+      "grupo": "Pro-code",
+      "color": "#397ef6",
+      "descripcion": "Agentes de IA a medida con Microsoft Foundry y modernización de aplicaciones con IA.",
+      "subfamilias": [
+        {
+          "id": "foundry",
+          "nombre": "Agentes con Foundry",
+          "etiqueta": "Agente con Foundry",
+          "descripcion": "Agentes construidos con código sobre Foundry Agent Service y Microsoft Agent Framework."
+        },
+        {
+          "id": "modernizacion",
+          "nombre": "Modernización",
+          "etiqueta": "Modernización",
+          "descripcion": "Evaluación, migración y contenedorización de aplicaciones con GitHub Copilot y Azure."
+        }
+      ]
+    },
+    {
+      "id": "m365-copilot",
+      "nombre": "Microsoft 365 Copilot",
+      "grupo": "Low code",
+      "color": "#53b6ad",
+      "descripcion": "Agentes declarativos y escenarios dentro de Teams, Outlook, Word y Excel.",
+      "subfamilias": []
+    },
+    {
+      "id": "copilot-studio",
+      "nombre": "Copilot Studio",
+      "grupo": "Low code",
+      "color": "#66de7f",
+      "descripcion": "Agentes de help desk, RR. HH., onboarding, ventas y atención, con conectores y Power Automate.",
+      "subfamilias": []
+    }
+  ],
+  "plataformas": [
+    "Microsoft Foundry",
+    "GitHub Copilot",
+    "Microsoft 365 Copilot",
+    "Copilot Studio"
+  ],
+  "contacto": {
+    "email": "contacto@readymind.ms",
+    "url": "https://readymind.ms",
+    "cta_texto": "Quiero un agente así",
+    "cta_url": "mailto:contacto@readymind.ms?subject=Cat%C3%A1logo%20de%20agentes"
+  }
+}
