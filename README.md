@@ -107,7 +107,7 @@ La primera vez el catálogo está vacío y se carga la semilla (`backend/seed/ag
 | `AUTH_MODE` | `pin` (local) o `entra` (Azure) | `pin` |
 | `ADMIN_PIN` | PIN para entrar al back en modo `pin`. Si está vacío, el back no abre | — |
 | `SESSION_SECRET` | Firma de la cookie del PIN. Si no se define, cambia en cada arranque | aleatorio |
-| `ADMIN_ALLOWED_DOMAINS` | Dominios con acceso al back en modo `entra`, separados por coma (ej. `readymind.com`) | todo el tenant |
+| `ADMIN_ALLOWED_DOMAINS` | Dominios con acceso al back en modo `entra`, separados por coma (ej. `readymind.ms`) | todo el tenant |
 | `ADMIN_ALLOWED_EMAILS` | Correos con acceso al back en modo `entra` | — |
 | `DATA_DIR` | Carpeta de datos en local | `./data` |
 | `AZURE_STORAGE_ACCOUNT_URL` | Si se define, usa Blob Storage con identidad administrada | — |
@@ -263,7 +263,7 @@ az login
 
 azd env new catalogo-prod
 azd env set AZURE_LOCATION eastus2
-azd env set ADMIN_ALLOWED_DOMAINS readymind.com
+azd env set ADMIN_ALLOWED_DOMAINS readymind.ms
 
 azd up
 ```
