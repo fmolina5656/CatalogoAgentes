@@ -334,6 +334,7 @@ azd deploy
 Cambios en Bicep o en variables: `azd provision`. Si el secreto vence, renuévalo con `az ad app credential reset …`, ejecuta `azd env set ENTRA_CLIENT_SECRET …` y luego `azd provision`.
 
 **Notas:**
+- El primer despliegue arranca con una imagen de ejemplo de Microsoft, sin sondas de salud y con 0 réplicas mínimas. `azd deploy` solo cambia la imagen, así que después del primer `azd up` corre `azd provision` una vez más; si sigues los pasos de Entra ID, ya lo haces. Con eso se aplican las sondas en `/api/salud` y `MIN_REPLICAS`.
 - Al primer arranque en Azure, el catálogo vacío se llena con la semilla. Para empezar vacío, ejecuta `azd env set SEED_ON_EMPTY false` antes de `azd up`.
 - `MIN_REPLICAS` (por defecto 1) evita el arranque en frío durante un evento. Con `azd env set MIN_REPLICAS 0` ahorras costo.
 

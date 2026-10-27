@@ -149,6 +149,17 @@ var secretos = concat([
   { name: 'microsoft-provider-authentication-secret', value: entraClientSecret }
 ] : [])
 
+// Imagen de ejemplo hasta el primer `azd deploy`. Escucha en el puerto 80, no en el 8000,
+// así que mientras esté puesta no lleva sondas ni réplicas mínimas: si no, la revisión
+// nunca queda sana y el aprovisionamiento vence ("Operation expired").
+var imagenEjemplo = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+var imagen = webExists ? appExistente.properties.template.containers[0].image : imagenEjemplo
+var esEjemplo = imagen == imagenEjemplo
+var sondas = esEjemplo ? [] : [
+  { type: 'Liveness', httpGet: { path: '/api/salud', port: 8000 }, initialDelaySeconds: 10, periodSeconds: 30 }
+  { type: 'Readiness', httpGet: { path: '/api/salud', port: 8000 }, periodSeconds: 10 }
+]
+
 resource app 'Microsoft.App/containerApps@2024-03-01' = {
   name: appName
   location: location
@@ -175,7 +186,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
       containers: [
         {
           name: 'web'
-          image: webExists ? appExistente.properties.template.containers[0].image : 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: imagen
           resources: { cpu: json('0.5'), memory: '1Gi' }
           env: [
             { name: 'AZURE_STORAGE_ACCOUNT_URL', value: storage.properties.primaryEndpoints.blob }
@@ -188,13 +199,10 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'SEED_ON_EMPTY', value: seedOnEmpty }
             { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', secretRef: 'appinsights' }
           ]
-          probes: [
-            { type: 'Liveness', httpGet: { path: '/api/salud', port: 8000 }, periodSeconds: 30 }
-            { type: 'Readiness', httpGet: { path: '/api/salud', port: 8000 }, periodSeconds: 10 }
-          ]
+          probes: sondas
         }
       ]
-      scale: { minReplicas: minReplicas, maxReplicas: 3 }
+      scale: { minReplicas: esEjemplo ? 0 : minReplicas, maxReplicas: 3 }
     }
   }
   dependsOn: [ registryPull, blobApp ]
