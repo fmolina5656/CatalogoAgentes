@@ -278,28 +278,42 @@ Hay dos salidas:
 
 **A. Pedir el permiso (lo más simple).** Pide a quien administre la suscripción el rol **Role Based Access Control Administrator** sobre el grupo de recursos `rg-<entorno>`. Puede limitarlo a esos dos roles. Luego repite `azd up`.
 
-**B. Provisionar sin roles y que un admin los cree.** Tú corres:
+**B. Provisionar sin roles y que un admin los cree.**
 
-```bat
-azd env set ASIGNAR_ROLES false
-azd provision
-azd env get-values
-```
+1. Tú corres:
 
-De la salida de `azd env get-values` toma `AZURE_IDENTITY_PRINCIPAL_ID`, `AZURE_CONTAINER_REGISTRY_ID` y `AZURE_STORAGE_ACCOUNT_ID`. Con esos valores, alguien con permiso (Owner, User Access Administrator o RBAC Administrator) corre una sola vez:
+   ```bat
+   azd env set ASIGNAR_ROLES false
+   azd provision
+   ```
 
-```bat
-az role assignment create --assignee-object-id <AZURE_IDENTITY_PRINCIPAL_ID> --assignee-principal-type ServicePrincipal --role "AcrPull" --scope <AZURE_CONTAINER_REGISTRY_ID>
-az role assignment create --assignee-object-id <AZURE_IDENTITY_PRINCIPAL_ID> --assignee-principal-type ServicePrincipal --role "Storage Blob Data Contributor" --scope <AZURE_STORAGE_ACCOUNT_ID>
-```
+   Este primer `azd provision` crea todo y **falla al final en la Container App** con `Operation expired`, después de unos 20 minutos. Es lo esperado: Container Apps no levanta ninguna revisión mientras su identidad no tenga AcrPull sobre el registro. En los logs de sistema se ve como `ACR token exchange endpoint returned error status: 401`.
 
-Después, tú:
+2. Saca los ids. Como el despliegue falló, `azd env get-values` no los trae:
 
-```bat
-azd deploy
-```
+   ```bat
+   az identity show -n id-catalogo-<token> -g rg-<entorno> --query principalId -o tsv
+   az acr show -n cr<token> --query id -o tsv
+   az storage account show -n st<token> -g rg-<entorno> --query id -o tsv
+   ```
 
-En la opción B usa `azd provision` y luego `azd deploy`, no `azd up`: sin los roles, la app no puede bajar su imagen del registro ni leer el Storage. Los roles se crean una sola vez; los `azd provision` posteriores no los tocan mientras `ASIGNAR_ROLES` siga en `false`.
+   `<token>` es el sufijo que ves en los nombres de los recursos del grupo.
+
+3. Alguien con permiso (Owner, User Access Administrator o RBAC Administrator) corre una sola vez:
+
+   ```bat
+   az role assignment create --assignee-object-id <principalId> --assignee-principal-type ServicePrincipal --role "AcrPull" --scope <id del registro>
+   az role assignment create --assignee-object-id <principalId> --assignee-principal-type ServicePrincipal --role "Storage Blob Data Contributor" --scope <id del Storage>
+   ```
+
+4. Espera 2–3 minutos a que se propaguen los roles y corre:
+
+   ```bat
+   azd provision
+   azd deploy
+   ```
+
+En la opción B no uses `azd up`. Los roles se crean una sola vez; los `azd provision` posteriores no los tocan mientras `ASIGNAR_ROLES` siga en `false`.
 
 **Activar el acceso al back con Entra ID.** El registro de aplicación necesita la URL de la app, por eso se hace después del primer `azd up`:
 
