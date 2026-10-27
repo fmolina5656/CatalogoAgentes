@@ -10,6 +10,8 @@ param adminAllowedDomains string
 param adminAllowedEmails string
 param minReplicas int
 param seedOnEmpty string
+@description('false = no crea asignaciones de roles (para cuentas sin permiso de asignarlos); un admin las crea después.')
+param asignarRoles bool
 
 var appName = 'ca-catalogo-${token}'
 var conEntra = !empty(entraClientId)
@@ -58,7 +60,7 @@ resource registry 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
   }
 }
 
-resource registryPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource registryPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (asignarRoles) {
   scope: registry
   name: guid(registry.id, identidad.id, acrPull)
   properties: {
@@ -100,7 +102,7 @@ resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@20
   properties: { publicAccess: 'None' }
 }
 
-resource blobApp 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource blobApp 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (asignarRoles) {
   scope: storage
   name: guid(storage.id, identidad.id, blobDataContributor)
   properties: {
@@ -110,7 +112,7 @@ resource blobApp 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
-resource blobUsuario 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(principalId)) {
+resource blobUsuario 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (asignarRoles && !empty(principalId)) {
   scope: storage
   name: guid(storage.id, principalId, blobDataContributor)
   properties: {
@@ -222,6 +224,9 @@ resource auth 'Microsoft.App/containerApps/authConfigs@2024-03-01' = if (conEntr
 
 output registryLoginServer string = registry.properties.loginServer
 output registryName string = registry.name
+output registryId string = registry.id
+output storageId string = storage.id
+output identityPrincipalId string = identidad.properties.principalId
 output storageUrl string = storage.properties.primaryEndpoints.blob
 output appName string = app.name
 output appUri string = 'https://${app.properties.configuration.ingress.fqdn}'
