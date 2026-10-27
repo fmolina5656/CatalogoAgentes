@@ -24,7 +24,7 @@ param entraClientId string = ''
 @description('Secreto del registro de aplicación de Microsoft Entra.')
 param entraClientSecret string = ''
 
-@description('Dominios con acceso al back, separados por coma (ej. readymind.com). Vacío = todo el tenant.')
+@description('Dominios con acceso al back, separados por coma (ej. readymind.ms). Vacío = todo el tenant.')
 param adminAllowedDomains string = ''
 
 @description('Correos con acceso al back, separados por coma. Opcional.')
