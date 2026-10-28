@@ -1,12 +1,18 @@
-.git
-.venv
-.azure
-data
-capturas
+# Lista blanca: solo entra al build lo que necesita la imagen.
+# Así no se cuelan .venv, node_modules, .git, data/ ni archivos sueltos
+# (en Windows con OneDrive, un archivo que cambia mientras azd lo empaqueta
+# rompe el build remoto con "archive/tar: write too long").
+*
+!Dockerfile
+!catalogo.config.json
+!backend/requirements.txt
+!backend/app/**
+!backend/seed/**
+!frontend/package.json
+!frontend/package-lock.json
+!frontend/index.html
+!frontend/tsconfig.json
+!frontend/vite.config.ts
+!frontend/public/**
+!frontend/src/**
 **/__pycache__
-**/.pytest_cache
-frontend/node_modules
-frontend/dist
-backend/tests
-e2e
-*.md
