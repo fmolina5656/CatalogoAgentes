@@ -315,22 +315,19 @@ Hay dos salidas:
 
 En la opción B no uses `azd up`. Los roles se crean una sola vez; los `azd provision` posteriores no los tocan mientras `ASIGNAR_ROLES` siga en `false`.
 
-**Activar el acceso al back con Entra ID.** El registro de aplicación necesita la URL de la app, por eso se hace después del primer `azd up`:
+**Activar el acceso al back con Entra ID.** El registro de aplicación necesita la URL de la app, por eso se hace después del primer despliegue. Los comandos son para PowerShell y guardan los valores en variables, así que no hay nada que copiar a mano (el secreto no se muestra en pantalla):
 
-```bat
-azd env get-value ENTRA_REDIRECT_URI
-REM Copia el valor; se ve así: https://ca-catalogo-xxxx.<región>.azurecontainerapps.io/.auth/login/aad/callback
-
-az ad app create --display-name "Catalogo de agentes" --sign-in-audience AzureADMyOrg --enable-id-token-issuance true --web-redirect-uris <ENTRA_REDIRECT_URI> --query appId -o tsv
-REM Copia el appId que regresa
-
-az ad app credential reset --id <appId> --display-name catalogo --years 1 --query password -o tsv
-REM Copia el secreto (solo se muestra una vez)
-
-azd env set ENTRA_CLIENT_ID <appId>
-azd env set ENTRA_CLIENT_SECRET <secreto>
+```powershell
+$redirect = azd env get-value ENTRA_REDIRECT_URI
+$appId = az ad app create --display-name "Catalogo de agentes" --sign-in-audience AzureADMyOrg --enable-id-token-issuance true --web-redirect-uris $redirect --query appId -o tsv
+$secreto = az ad app credential reset --id $appId --display-name catalogo --years 1 --query password -o tsv
+azd env set ENTRA_CLIENT_ID $appId
+azd env set ENTRA_CLIENT_SECRET $secreto
+azd env set SERVICE_WEB_RESOURCE_EXISTS true
 azd provision
 ```
+
+Si `ENTRA_REDIRECT_URI` sale vacío, ponlo a mano: `$redirect = "https://<url-de-tu-app>/.auth/login/aad/callback"`.
 
 Listo: `https://<tu-app>/admin` pide tu cuenta de Microsoft.
 
