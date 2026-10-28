@@ -84,3 +84,29 @@ def test_modo_entra_usa_el_principal_y_respeta_dominios(tmp_path):
 def test_en_modo_pin_se_ignora_el_encabezado_de_entra(client):
     r = client.get("/api/admin/agentes", headers={"X-MS-CLIENT-PRINCIPAL": _principal("ana@readymind.com")})
     assert r.status_code == 401
+
+
+def _principal_claims(claims: list[dict]) -> str:
+    import base64
+    import json
+
+    return base64.b64encode(json.dumps({"auth_typ": "aad", "claims": claims}).encode()).decode()
+
+
+def test_modo_entra_acepta_el_correo_en_cualquier_claim(tmp_path):
+    c = TestClient(create_app(make_settings(tmp_path, auth_mode="entra", allowed_domains=["readymind.ms"])))
+    # preferred_username con otro dominio, pero el upn sí es del dominio permitido
+    claims = [{"typ": "preferred_username", "val": "alias@readymind.onmicrosoft.com"},
+              {"typ": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn", "val": "Ana@ReadyMind.ms"}]
+    r = c.get("/api/admin/agentes", headers={"X-MS-CLIENT-PRINCIPAL": _principal_claims(claims)})
+    assert r.status_code == 200
+    s = c.get("/api/admin/sesion", headers={"X-MS-CLIENT-PRINCIPAL": _principal_claims(claims)}).json()
+    assert s["autenticado"] and s["usuario"]["usuario"] == "ana@readymind.ms"
+
+
+def test_modo_entra_explica_si_la_cuenta_no_tiene_acceso(tmp_path):
+    c = TestClient(create_app(make_settings(tmp_path, auth_mode="entra", allowed_domains=["readymind.ms"])))
+    h = {"X-MS-CLIENT-PRINCIPAL": _principal("eve@otra.com")}
+    s = c.get("/api/admin/sesion", headers=h).json()
+    assert s["autenticado"] is False and s["rechazado"] == "eve@otra.com"
+    assert c.get("/api/admin/sesion").json()["rechazado"] is None

@@ -89,14 +89,20 @@ def _principal_entra(request: Request) -> dict | None:
     except Exception:  # noqa: BLE001
         return None
     claims = {c.get("typ"): c.get("val") for c in data.get("claims", [])}
-    email = (
-        claims.get("preferred_username")
-        or claims.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")
-        or claims.get("email")
-        or request.headers.get("x-ms-client-principal-name", "")
-    )
-    nombre = claims.get("name") or email
-    return {"usuario": (email or "").lower(), "nombre": nombre, "modo": "entra"}
+    # Entra puede mandar el correo en distintos claims según la cuenta y el tipo de token.
+    candidatos = [
+        claims.get("preferred_username"),
+        claims.get("email"),
+        claims.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"),
+        claims.get("upn"),
+        claims.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"),
+        claims.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"),
+        request.headers.get("x-ms-client-principal-name"),
+    ]
+    correos = list(dict.fromkeys(c.strip().lower() for c in candidatos if c and c.strip()))
+    usuario = correos[0] if correos else ""
+    nombre = claims.get("name") or usuario
+    return {"usuario": usuario, "nombre": nombre, "modo": "entra", "correos": correos}
 
 
 def _permitido(usuario: str, s: Settings) -> bool:
@@ -111,9 +117,12 @@ def _permitido(usuario: str, s: Settings) -> bool:
 def usuario_actual(request: Request, s: Settings) -> dict | None:
     if s.auth_mode == "entra":
         p = _principal_entra(request)
-        if p and p["usuario"] and _permitido(p["usuario"], s):
-            return p
-        return None
+        if not p:
+            return None
+        permitido = next((c for c in p.pop("correos") if _permitido(c, s)), None)
+        if not permitido:
+            return None
+        return {**p, "usuario": permitido}
     token = request.cookies.get(COOKIE)
     if not token or not s.admin_pin:
         return None
@@ -121,6 +130,16 @@ def usuario_actual(request: Request, s: Settings) -> dict | None:
     if not payload:
         return None
     return {"usuario": payload["u"], "nombre": "Equipo (PIN local)", "modo": "pin"}
+
+
+def cuenta_rechazada(request: Request, s: Settings) -> str | None:
+    """En modo entra: la cuenta con la que se entró a Microsoft, si no tiene acceso al back."""
+    if s.auth_mode != "entra":
+        return None
+    p = _principal_entra(request)
+    if not p or any(_permitido(c, s) for c in p["correos"]):
+        return None
+    return p["usuario"] or "(sin correo en el token)"
 
 
 def exigir_admin(request: Request) -> dict:

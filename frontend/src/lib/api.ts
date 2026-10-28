@@ -29,6 +29,7 @@ export interface Sesion {
   usuario: { usuario: string; nombre: string; modo: string } | null;
   modo: "pin" | "entra";
   pin_configurado: boolean;
+  rechazado: string | null;
   login_url: string | null;
   logout_url: string | null;
 }

@@ -6,7 +6,7 @@ import re
 from fastapi import APIRouter, Depends, File, Header, HTTPException, Request, Response, UploadFile
 from pydantic import BaseModel
 
-from ..auth import COOKIE, DURACION, exigir_admin, firmar, usuario_actual
+from ..auth import COOKIE, DURACION, cuenta_rechazada, exigir_admin, firmar, usuario_actual
 from ..images import ImagenInvalida, procesar
 from ..schema import AgenteEntrada
 
@@ -46,7 +46,8 @@ def sesion(request: Request):
     else:
         urls = {"login_url": None, "logout_url": None}
     return {"autenticado": bool(u), "usuario": u, "modo": s.auth_mode,
-            "pin_configurado": bool(s.admin_pin), **urls}
+            "pin_configurado": bool(s.admin_pin), "rechazado": None if u else cuenta_rechazada(request, s),
+            **urls}
 
 
 @publico.post("/login")

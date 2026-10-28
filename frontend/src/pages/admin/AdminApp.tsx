@@ -17,7 +17,15 @@ function Login({ s, onOk }: { s: Sesion; onOk: () => void }) {
       <Glitch size="96px" />
       <h1>Back del catálogo</h1>
       <p className="muted">Solo para el equipo de {m.organizacion}.</p>
-      {s.modo === "entra" ? (
+      {s.modo === "entra" && s.rechazado ? (
+        <>
+          <p className="banner error" role="alert">
+            Entraste como <b>{s.rechazado}</b>, pero esa cuenta no tiene acceso al back. Pide que la agreguen
+            en <code>ADMIN_ALLOWED_DOMAINS</code> o <code>ADMIN_ALLOWED_EMAILS</code>.
+          </p>
+          <a className="btn" href={s.logout_url ?? "/.auth/logout"}>Salir y entrar con otra cuenta</a>
+        </>
+      ) : s.modo === "entra" ? (
         <a className="btn primary big" href={s.login_url ?? "/.auth/login/aad"}>Entrar con mi cuenta de Microsoft</a>
       ) : !s.pin_configurado ? (
         <p className="banner warn">Para entrar en local define la variable <code>ADMIN_PIN</code> y reinicia el servidor.</p>
